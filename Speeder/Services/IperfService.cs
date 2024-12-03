@@ -1,41 +1,60 @@
 using System.Diagnostics;
-using System.Text.Json.Serialization;
 using Prometheus;
+using Speeder.Infra;
 
 namespace Speeder.Services;
 
-public class IperfService(ILogger<IperfService> log) : BackgroundService
+public class IperfService(ILogger<IperfService> log, ServerPool pool, IConfiguration config) : BackgroundService
 {
     private readonly Gauge _iperfLatencyGauge = Metrics.CreateGauge("iperf_latency_ms", "latency in ms");
     private readonly Gauge _iperfBandwidthGauge = Metrics.CreateGauge("iperf_bandwidth_bps", "bandwidth in bps");
-    private const string IperfServer = "iperf.worldstream.nl";
-    private const string IperfPort = "5201";
-    private const string IperfExePath = @"C:\Users\utf8x\Downloads\iperf3.17.1_64\iperf3.exe";
+    private readonly Counter _iperfRunsCounter = Metrics.CreateCounter("iperf_runs", "total iperf runs");
+    private readonly Counter _iperfFailureCounter = Metrics.CreateCounter("iperf_failures", "number of failures");
+
+    private readonly string IperfExePath = config.GetRequiredSection("Iperf").GetValue<string>("ExePath")
+        ?? throw new ApplicationException("missing configuration 'Iperf:ExePath'");
 
     private const int DelayMinutes = 1;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
-        {   
-            var result = RunIperf3Test();
-            if (result != null)
+        {
+            _iperfRunsCounter.Inc();
+            var nextServer = pool.GetNextAvailable();
+            if(nextServer is null)
             {
-                _iperfLatencyGauge.Set(CalculateAverageLatency(result));
-                _iperfBandwidthGauge.Set(result.End.ReceivedSum.BitsPerSecond);
-                log.LogInformation("latest result: bandwidth - {BW}; latency - {Lat}", result.End.ReceivedSum.BitsPerSecond, CalculateAverageLatency(result));
+                log.LogError("no servers are available at the moment, retrying in 30 seconds");
+                _iperfFailureCounter.Inc();
+                await Task.Delay(TimeSpan.FromSeconds(30));
+                continue;
             }
+
+            log.LogInformation("trying server {Server}", nextServer.Hostname);
+            var result = RunIperf3Test(nextServer);
+
+            if(result is null)
+            {
+                _iperfFailureCounter.Inc();
+                log.LogWarning("server {Server} did not work, trying next server", nextServer.Hostname);
+                nextServer.UnavailableSince = DateTime.UtcNow;
+                continue;
+            }
+
+            _iperfLatencyGauge.Set(CalculateAverageLatency(result));
+            _iperfBandwidthGauge.Set(result.End.ReceivedSum.BitsPerSecond);
+            log.LogInformation("latest result: bandwidth - {BW}; latency - {Lat}", result.End.ReceivedSum.BitsPerSecond, CalculateAverageLatency(result));
 
             log.LogInformation("speed test done, waiting for {Delay} minutes", DelayMinutes);
             await Task.Delay(TimeSpan.FromMinutes(DelayMinutes), stoppingToken);
         }
     }
 
-    private Iperf3Result? RunIperf3Test()
+    private Iperf3Result? RunIperf3Test(ServerPool.Iperf3Server server)
     {
-        var args = $"-c {IperfServer} -p {IperfPort} -J"; // Use JSON output for easier parsing
+        var args = $"-c {server.Hostname} -p {server.PortRange} -J"; // Use JSON output for easier parsing
         
-        log.LogInformation("starting a speed test (with: {Args})", args);
+        log.LogInformation("starting a speed test against {Server}", server.Hostname);
         
         try
         {
