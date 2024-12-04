@@ -1,0 +1,40 @@
+services:
+    iperf3_exporter:
+        image: ghcr.io/utf-8x/iperf3-exporter:latest        
+        environment:
+            # Please read the Ookla EULA (https://www.speedtest.net/about/eula)
+            # And uncomment this line to express your agreement with it.
+            # SPEEDER_OOKLA_EULA: 'ACCEPT'
+        networks:
+            - iperf3_exporter
+
+    prometheus:
+        image: prom/prometheus
+        command:
+            - '--config.file=/etc/prometheus/prometheus.yml'
+        ports:
+            - '9090:9090'
+        networks:
+            - iperf3_exporter
+        volumes:
+            - ./prometheus:/etc/prometheus
+            - prom_data:/prometheus
+
+    grafana:
+        image: grafana/grafana
+        ports:
+            - '3001:3000'
+        environment:
+            - GF_SECURITY_ADMIN_USER=admin
+            - GF_SECURITY_ADMIN_PASSWORD=admin
+        volumes:
+            - ./provisioning:/etc/grafana/provisioning
+            - ./dashboards:/var/lib/grafana/dashboards
+        networks:
+            - iperf3_exporter
+
+networks:
+    iperf3_exporter:
+
+volumes:
+    prom_data:    

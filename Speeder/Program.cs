@@ -1,13 +1,19 @@
 using Prometheus;
 using Speeder.Infra;
+using Speeder.Infra.Impl;
 using Speeder.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddMetricServer(o => {});
+
 builder.Services.AddSingleton<ServerPool>();
-builder.Services.AddHostedService<IperfService>();
+builder.Services.AddSingleton<Iperf3Adapter>();
+
+builder.Services.AddSingleton<OoklaAdapter>();
+
+builder.Services.AddHostedService<SpeedTestService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

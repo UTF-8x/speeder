@@ -1,4 +1,4 @@
-namespace Speeder.Services;
+namespace Speeder.Infra;
 
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
@@ -13,6 +13,9 @@ public class Iperf3Result
 
     [JsonPropertyName("end")]
     public End End { get; set; }
+
+    [JsonPropertyName("error")]
+    public string? Error { get; set; }
 }
 
 public class Start
