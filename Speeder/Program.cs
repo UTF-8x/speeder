@@ -12,13 +12,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.AddOpenTelemetry(o =>
 {
-    o
-    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
-    .AddConsoleExporter();
+    o.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName)).AddConsoleExporter();
+    o.AddOtlpExporter(o => o.Endpoint = new Uri("http://localhost:4317"));
 });
 
 builder.Services.AddOpenTelemetry()
-    .ConfigureResource(r => r.AddService(serviceName))
+    .ConfigureResource(r => r.AddService(serviceName))    
     .WithLogging();
 
 builder.Services.AddControllers();
