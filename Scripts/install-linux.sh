@@ -42,6 +42,11 @@ if ! command -v systemctl &> /dev/null; then
 	exit 1
 fi
 
+if ! command -v rsync &> /dev/null; then
+	echo "rsync is required"
+	exit 1
+fi
+
 mkdir -p "${target_config_dir}"
 mkdir -p "${target_install_dir}"
 
