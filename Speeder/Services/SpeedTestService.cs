@@ -24,20 +24,15 @@ public class SpeedTestService(
     private readonly Counter _runCounter = Metrics.CreateCounter("speeder_runs_counter", "total run count", ["source_name"]);
     private readonly Counter _failCounter = Metrics.CreateCounter("speeder_fails_counter", "total failed run count", ["source_name"]);
 
+    private readonly Gauge _intervalMinutes = Metrics.CreateGauge("speeder_interval_minutes", "measurement interval in minutes", ["source_name"]);
+
     private readonly int DelayMinutes = config.GetRequiredSection("Speeder").GetValue<int>("MeasurementIntervalSeconds");
 
-    private bool _ready = false;
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
+    {        
         while (!stoppingToken.IsCancellationRequested)
         {
-            if(!_ready)
-            {
-                log.LogInformation("speed test service ready");
-                _ready = true;
-                continue;
-            }
+            _intervalMinutes.WithLabels(["ookla"]).Set(DelayMinutes);
 
             _runCounter.WithLabels(["ookla"]).Inc();
 

@@ -3,6 +3,8 @@ using Speeder.Infra;
 using Speeder.Infra.Impl;
 using Speeder.Services;
 
+const int InternalSpeederVersion = 100;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -43,4 +45,11 @@ app.UseHttpsRedirection();
 
 app.UseMetricServer();
 app.MapControllers().WithOpenApi();
+
+// "fake" metrics
+var version = Metrics.CreateGauge("speeder_version", "speeder service version");
+version.Set(InternalSpeederVersion);
+var up = Metrics.CreateGauge("speeder_up", "is speeder up");
+up.Set(1);
+
 app.Run();
