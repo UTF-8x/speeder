@@ -54,6 +54,8 @@ public class SpeedTestService(
 
     private async Task DoTest(string label, ISpeedTestAdapter adapter, CancellationToken stoppingToken)
     {
+        log.LogInformation("running test with label {Label} and provider {Provider}", label, adapter.GetType().Name);
+
         _runCounter.WithLabels([label]).Inc();
         var result = await adapter.MeasureAsync(stoppingToken);
 

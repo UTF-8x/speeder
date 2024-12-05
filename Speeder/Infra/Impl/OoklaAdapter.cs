@@ -42,8 +42,6 @@ public class OoklaAdapter(ILogger<OoklaAdapter> log, IConfiguration config) : IS
     {
         var args = "--format json";
 
-        log.LogInformation("starting an Ookla speed test");
-
         try
         {
             var process = new Process
