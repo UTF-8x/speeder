@@ -6,7 +6,7 @@ using Speeder.Infra.Impl;
 using Speeder.Services;
 
 const string serviceName = "speeder";
-const int InternalSpeederVersion = 100;
+const int InternalSpeederVersion = 110;
 
 var builder = WebApplication.CreateBuilder(args);
 
