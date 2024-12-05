@@ -67,7 +67,7 @@ public class Iperf3Adapter(ILogger<Iperf3Adapter> log, ServerPool pool, IConfigu
             process.Start();
 
             var output = process.StandardOutput.ReadToEnd();
-            log.LogInformation(output);
+            log.LogDebug(output);
             process.WaitForExit();
 
             if (process.ExitCode != 0)
