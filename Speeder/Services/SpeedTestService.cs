@@ -24,7 +24,7 @@ public class SpeedTestService(
     private readonly Counter _runCounter = Metrics.CreateCounter("speeder_runs_counter", "total run count", ["source_name"]);
     private readonly Counter _failCounter = Metrics.CreateCounter("speeder_fails_counter", "total failed run count", ["source_name"]);
 
-    private const int DelayMinutes = 1;
+    private readonly int DelayMinutes = config.GetRequiredSection("Speeder").GetValue<int>("MeasurementIntervalSeconds");
 
     private bool _ready = false;
 
