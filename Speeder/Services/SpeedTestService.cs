@@ -26,7 +26,7 @@ public class SpeedTestService(
 
     private readonly Gauge _intervalMinutes = Metrics.CreateGauge("speeder_interval_minutes", "measurement interval in minutes", ["source_name"]);
 
-    private readonly int DelayMinutes = config.GetRequiredSection("Speeder").GetValue<int>("MeasurementIntervalSeconds");
+    private readonly int DelaySeconds = config.GetRequiredSection("Speeder").GetValue<int>("MeasurementIntervalSeconds");
 
     private readonly bool _useOokla = config.GetRequiredSection("Speeder").GetValue<bool>("UseOokla");
     private readonly bool _useIperf = config.GetRequiredSection("Speeder").GetValue<bool>("UseIperf");
@@ -35,8 +35,8 @@ public class SpeedTestService(
     {        
         while (!stoppingToken.IsCancellationRequested)
         {
-            _intervalMinutes.WithLabels(["ookla"]).Set(DelayMinutes);
-            _intervalMinutes.WithLabels(["iperf"]).Set(DelayMinutes);
+            _intervalMinutes.WithLabels(["ookla"]).Set(DelaySeconds);
+            _intervalMinutes.WithLabels(["iperf"]).Set(DelaySeconds);
 
             Task? ooklaTask = null;
             Task? iperfTask = null;
@@ -47,8 +47,8 @@ public class SpeedTestService(
             if (ooklaTask is not null) await ooklaTask;
             if (iperfTask is not null) await iperfTask;
 
-            log.LogInformation("speed test done, waiting for {Delay} minutes", DelayMinutes);
-            await Task.Delay(TimeSpan.FromMinutes(DelayMinutes), stoppingToken);
+            log.LogInformation("speed test done, waiting for {Delay} minutes", DelaySeconds);
+            await Task.Delay(TimeSpan.FromSeconds(DelaySeconds), stoppingToken);
         }
     }
 
