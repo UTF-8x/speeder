@@ -9,6 +9,8 @@ public class OoklaAdapter(ILogger<OoklaAdapter> log, IConfiguration config) : IS
     private readonly string _speedtestExe = config.GetRequiredSection("Ookla")["ExePath"]
         ?? throw new ApplicationException("missing required configuration section Ookla:ExePath");
 
+    private readonly string? _serverId = config.GetRequiredSection("Ookla")["ServerId"];
+
     public Task<SpeedTestResult?> MeasureAsync(CancellationToken cancel)
     {
         while(!cancel.IsCancellationRequested)
@@ -41,6 +43,11 @@ public class OoklaAdapter(ILogger<OoklaAdapter> log, IConfiguration config) : IS
     private OoklaResult? RunOoklaTest()
     {
         var args = "--format json";
+        if(_serverId is not null)
+        {
+            log.LogDebug("server ID {ID} specified, will measure against this server", _serverId);
+            args += $" --server-id {_serverId}";
+        }
 
         try
         {
