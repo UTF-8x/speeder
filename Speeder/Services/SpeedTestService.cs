@@ -59,7 +59,7 @@ public class SpeedTestService(
                 _downJitterGauge.WithLabels(["ookla"]).Set(ooklaResult.DownJitter);
 
                 _upBandwidthGauge.WithLabels(["ookla"]).Set(ooklaResult.UploadSpeed);
-                _downBandwidthGauge.WithLabels(["ookla"]).Set(ooklaResult.UploadSpeed);
+                _downBandwidthGauge.WithLabels(["ookla"]).Set(ooklaResult.DownloadSpeed);
             }
 
             log.LogInformation("speed test done, waiting for {Delay} minutes", DelayMinutes);
