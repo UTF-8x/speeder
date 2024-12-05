@@ -2,6 +2,23 @@
 
 set -e
 
+version_ge() {
+	local version1="$1"
+	local version2="$2"
+
+	IFS='.' read -ra v1 <<< "$version1"
+	IFS='.' read -ra v2 <<< "$version2"
+
+	for i in {0..2}; do
+		if [ -z "${v1[i]}" ]; then v1[i]=0; fi
+        if [ -z "${v2[i]}" ]; then v2[i]=0; fi
+        if [ "${v1[i]}" -gt "${v2[i]}" ]; then return 0; fi
+        if [ "${v1[i]}" -lt "${v2[i]}" ]; then return 1; fi
+	done
+
+	return 0
+}
+
 installed_version=$(dotnet --version 2>/dev/null)
 
 target_config_dir="/etc/speeder"
@@ -15,7 +32,7 @@ fi
 
 required_dotnet_version="8.0"
 
-if [[ "$(printf '%s\n' $required_version $installed_version | sort -V | head -n1)" != $required_version ]]; then
+if version_ge "$dotnet_version" "8.0"; then
 	echo ".NET 8.0 or newer is required"
 	exit 1
 fi
