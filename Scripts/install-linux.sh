@@ -105,7 +105,7 @@ EOL
 
 mkdir -p /var/log || exit 1
 touch /var/log/speeder.log || exit 1
-systemstl restart rsyslog || exit 1
+systemctl restart rsyslog || exit 1
 
 echo "Restarting service..."
 
