@@ -32,10 +32,10 @@ public class Iperf3Adapter(ILogger<Iperf3Adapter> log, ServerPool pool, IConfigu
             {
                 DownloadSpeed = result.End.ReceivedSum.BitsPerSecond,
                 UploadSpeed = result.End.SentSum.BitsPerSecond,
-                AverageLatency = CalculateAverageLatency(result),
-                AverageJitter = -1,
-                Latencies = [CalculateAverageLatency(result)],
-                Jitters = [-1]
+                UpLatency = -1,
+                DownLatency = -1,
+                UpJitter = -1,
+                DownJitter = -1
             });
         }
 

@@ -12,11 +12,17 @@ public class SpeedTestService(
     OoklaAdapter ooklaAdapter) : BackgroundService
 {
 
-    private readonly Gauge _LatencyGauge = Metrics.CreateGauge("speeder_download_latency", "latency from Ookla speedtest", ["source_name"]);
-    private readonly Gauge _downBandwidthGauge = Metrics.CreateGauge("speeder_download_speed", "download bandwidth from Ookla speedtest", ["source_name"]);
-    private readonly Gauge _upBandwidthGauge = Metrics.CreateGauge("speeder_upload_speed", "upload bandwidth from Ookla speedtest", ["source_name"]);
-    private readonly Counter _runCounter = Metrics.CreateCounter("speeder_runs_counter", "total count of all Ookla speedtest runs", ["source_name"]);
-    private readonly Counter _failCounter = Metrics.CreateCounter("speeder_fails_counter", "total count of failed Ookla speedtest runs", ["source_name"]);
+    private readonly Gauge _upLatencyGauge = Metrics.CreateGauge("speeder_upload_latency", "upload latency", ["source_name"]);
+    private readonly Gauge _downLatencyGauge = Metrics.CreateGauge("speeder_download_latency", "download latency", ["source_name"]);
+
+    private readonly Gauge _upJitterGauge = Metrics.CreateGauge("speeder_upload_jitter", "upload jitter", ["source_name"]);
+    private readonly Gauge _downJitterGauge = Metrics.CreateGauge("speeder_download_jitter", "download jitter", ["source_name"]);
+
+    private readonly Gauge _downBandwidthGauge = Metrics.CreateGauge("speeder_download_speed", "download speed", ["source_name"]);
+    private readonly Gauge _upBandwidthGauge = Metrics.CreateGauge("speeder_upload_speed", "upload speed", ["source_name"]);
+    
+    private readonly Counter _runCounter = Metrics.CreateCounter("speeder_runs_counter", "total run count", ["source_name"]);
+    private readonly Counter _failCounter = Metrics.CreateCounter("speeder_fails_counter", "total failed run count", ["source_name"]);
 
     private const int DelayMinutes = 1;
 
@@ -34,13 +40,10 @@ public class SpeedTestService(
             }
 
             _runCounter.WithLabels(["ookla"]).Inc();
-            _runCounter.WithLabels(["iperf"]).Inc();
 
             var ooklaTask = ooklaAdapter.MeasureAsync(stoppingToken);
-            var iperfTask = iperfAdapter.MeasureAsync(stoppingToken);
 
             var ooklaResult = await ooklaTask;
-            var iperfResult = await iperfTask;
 
             if(ooklaResult is null) 
             {
@@ -49,21 +52,14 @@ public class SpeedTestService(
             }
             else
             {
-                _downBandwidthGauge.WithLabels(["ookla"]).Set(ooklaResult.DownloadSpeed);
-                _upBandwidthGauge.WithLabels(["ookla"]).Set(ooklaResult.UploadSpeed);
-                _LatencyGauge.WithLabels(["ookla"]).Set(ooklaResult.AverageLatency);
-            }
+                _upLatencyGauge.WithLabels(["ookla"]).Set(ooklaResult.UpLatency);
+                _downLatencyGauge.WithLabels(["ookla"]).Set(ooklaResult.DownLatency);
 
-            if(iperfResult is null)
-            {
-                log.LogWarning("iperf test failed");
-                _failCounter.WithLabels(["iperf"]).Inc();
-            }
-            else
-            {
-                _downBandwidthGauge.WithLabels(["iperf"]).Set(iperfResult.DownloadSpeed);
-                _upBandwidthGauge.WithLabels(["iperf"]).Set(iperfResult.UploadSpeed);
-                _LatencyGauge.WithLabels(["iperf"]).Set(iperfResult.AverageLatency);
+                _upJitterGauge.WithLabels(["ookla"]).Set(ooklaResult.UpJitter);
+                _downJitterGauge.WithLabels(["ookla"]).Set(ooklaResult.DownJitter);
+
+                _upBandwidthGauge.WithLabels(["ookla"]).Set(ooklaResult.UploadSpeed);
+                _downBandwidthGauge.WithLabels(["ookla"]).Set(ooklaResult.UploadSpeed);
             }
 
             log.LogInformation("speed test done, waiting for {Delay} minutes", DelayMinutes);

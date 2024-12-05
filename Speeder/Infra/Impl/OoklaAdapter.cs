@@ -21,14 +21,16 @@ public class OoklaAdapter(ILogger<OoklaAdapter> log, IConfiguration config) : IS
                 return Task.FromResult<SpeedTestResult?>(null);
             }
 
+            log.LogDebug("Ookla Speedtest result URL: {Url}", result.Result.Url);
+
             return Task.FromResult<SpeedTestResult?>(new SpeedTestResult
             {
-                DownloadSpeed = result.Download.Bandwidth,
-                UploadSpeed = result.Upload.Bandwidth,
-                AverageLatency = (int)result.Download.Latency.Iqm,
-                AverageJitter = (int)result.Download.Latency.Jitter,
-                Latencies = [(int)result.Download.Latency.Iqm],
-                Jitters = [(int)result.Download.Latency.Jitter]
+                DownloadSpeed = result.Download.Bytes,
+                UploadSpeed = result.Upload.Bytes,
+                UpLatency = result.Upload.Latency.Iqm,
+                UpJitter = result.Upload.Latency.Jitter,
+                DownLatency = result.Download.Latency.Iqm,
+                DownJitter = result.Download.Latency.Jitter
             });
         }
 

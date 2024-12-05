@@ -6,11 +6,11 @@ public class SpeedTestResult
 
     public double UploadSpeed { get; set; }
 
-    public int AverageLatency { get; set; }
+    public double DownLatency { get; set; }
 
-    public int AverageJitter { get; set; }
+    public double DownJitter { get; set; }
 
-    public int[]? Latencies { get; set; }
+    public double UpLatency { get; set; }
 
-    public int[]? Jitters { get; set; }
+    public double UpJitter { get; set; }
 }

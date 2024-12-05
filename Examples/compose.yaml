@@ -4,7 +4,7 @@ services:
         environment:
             # Please read the Ookla EULA (https://www.speedtest.net/about/eula)
             # And uncomment this line to express your agreement with it.
-            # SPEEDER_OOKLA_EULA: 'ACCEPT'
+            SPEEDER_OOKLA_EULA: 'ACCEPT'
         networks:
             - iperf3_exporter
 
