@@ -23,7 +23,7 @@ installed_version=$(dotnet --version 2>/dev/null)
 
 target_config_dir="/etc/speeder"
 target_install_dir="/var/lib/speeder"
-systemd_unit_path="/etc/systemd/system/speeder.unit"
+systemd_unit_path="/etc/systemd/system/speeder.service"
 
 if [ $? -ne 0 ]; then
 	echo ".NET Is not installed"
@@ -82,12 +82,30 @@ Type=simple
 Restart=always
 RestartSec=1
 User=root
+
 ExecStart=/usr/bin/speeder
 WorkingDirectory=/var/lib/speeder
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=speeder
 
 [Install]
 WantedBy=multi-user.target
 EOL
+
+echo "(re)configuring logging..."
+
+mkdir -p /etc/rsyslog.d || exit 1
+touch /etc/rsyslog.d/speeder.conf || exit 1
+cat <<EOL > /etc/rsyslog.d/speeder.conf
+if $programname == 'speeder' then /var/log/speeder.log
+& stop
+EOL
+
+mkdir -p /var/log || exit 1
+touch /var/log/speeder.log || exit 1
+systemstl restart rsyslog || exit 1
 
 echo "Restarting service..."
 

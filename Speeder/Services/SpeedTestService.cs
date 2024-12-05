@@ -28,37 +28,50 @@ public class SpeedTestService(
 
     private readonly int DelayMinutes = config.GetRequiredSection("Speeder").GetValue<int>("MeasurementIntervalSeconds");
 
+    private readonly bool _useOokla = config.GetRequiredSection("Speeder").GetValue<bool>("UseOokla");
+    private readonly bool _useIperf = config.GetRequiredSection("Speeder").GetValue<bool>("UseIperf");
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {        
         while (!stoppingToken.IsCancellationRequested)
         {
             _intervalMinutes.WithLabels(["ookla"]).Set(DelayMinutes);
+            _intervalMinutes.WithLabels(["iperf"]).Set(DelayMinutes);
 
-            _runCounter.WithLabels(["ookla"]).Inc();
+            Task? ooklaTask = null;
+            Task? iperfTask = null;
 
-            var ooklaTask = ooklaAdapter.MeasureAsync(stoppingToken);
+            if (_useOokla) ooklaTask = DoTest("ookla", ooklaAdapter, stoppingToken);
+            if (_useIperf) iperfTask = DoTest("iperf", iperfAdapter, stoppingToken);
 
-            var ooklaResult = await ooklaTask;
-
-            if(ooklaResult is null) 
-            {
-                log.LogWarning("ookla test failed");
-                _failCounter.WithLabels(["ookla"]).Inc();
-            }
-            else
-            {
-                _upLatencyGauge.WithLabels(["ookla"]).Set(ooklaResult.UpLatency);
-                _downLatencyGauge.WithLabels(["ookla"]).Set(ooklaResult.DownLatency);
-
-                _upJitterGauge.WithLabels(["ookla"]).Set(ooklaResult.UpJitter);
-                _downJitterGauge.WithLabels(["ookla"]).Set(ooklaResult.DownJitter);
-
-                _upBandwidthGauge.WithLabels(["ookla"]).Set(ooklaResult.UploadSpeed);
-                _downBandwidthGauge.WithLabels(["ookla"]).Set(ooklaResult.DownloadSpeed);
-            }
+            if (ooklaTask is not null) await ooklaTask;
+            if (iperfTask is not null) await iperfTask;
 
             log.LogInformation("speed test done, waiting for {Delay} minutes", DelayMinutes);
             await Task.Delay(TimeSpan.FromMinutes(DelayMinutes), stoppingToken);
+        }
+    }
+
+    private async Task DoTest(string label, ISpeedTestAdapter adapter, CancellationToken stoppingToken)
+    {
+        _runCounter.WithLabels([label]).Inc();
+        var result = await adapter.MeasureAsync(stoppingToken);
+
+        if (result is null)
+        {
+            log.LogWarning($"{label} test failed");
+            _failCounter.WithLabels([label]).Inc();
+        }
+        else
+        {
+            _upLatencyGauge.WithLabels([label]).Set(result.UpLatency);
+            _downLatencyGauge.WithLabels([label]).Set(result.DownLatency);
+
+            _upJitterGauge.WithLabels([label]).Set(result.UpJitter);
+            _downJitterGauge.WithLabels([label]).Set(result.DownJitter);
+
+            _upBandwidthGauge.WithLabels([label]).Set(result.UploadSpeed);
+            _downBandwidthGauge.WithLabels([label]).Set(result.DownloadSpeed);
         }
     }
 }
