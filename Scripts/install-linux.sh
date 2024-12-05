@@ -55,9 +55,9 @@ echo "Building a release..."
 
 pushd Speeder || exit 1
 rm -rf out
-dotnet publish -c Release -o /out
+dotnet publish -c Release
 
-pushd out || exit 1
+pushd bin/Release/net8.0 || exit 1
 echo "Installing..."
 rsync -av --exclude 'appsettings.json' --exclude 'appsettings.Development.json' "./" "${target_install_dir}/"
 
