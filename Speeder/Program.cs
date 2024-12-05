@@ -10,8 +10,11 @@ const int InternalSpeederVersion = 110;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
 builder.Logging.AddOpenTelemetry(o =>
 {
+    o.IncludeFormattedMessage = true;
+    o.ParseStateValues = true;
     o.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName)).AddConsoleExporter();
     o.AddOtlpExporter(o => o.Endpoint = new Uri("http://localhost:4317"));
 });
