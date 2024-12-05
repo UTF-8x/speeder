@@ -1,11 +1,25 @@
+using OpenTelemetry.Logs;
+using OpenTelemetry.Resources;
 using Prometheus;
 using Speeder.Infra;
 using Speeder.Infra.Impl;
 using Speeder.Services;
 
+const string serviceName = "speeder";
 const int InternalSpeederVersion = 100;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.AddOpenTelemetry(o =>
+{
+    o
+    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName))
+    .AddConsoleExporter();
+});
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(r => r.AddService(serviceName))
+    .WithLogging();
 
 builder.Services.AddControllers();
 builder.Services.AddMetricServer(o => {});
