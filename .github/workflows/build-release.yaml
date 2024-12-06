@@ -1,9 +1,9 @@
 name: Build Release
 
 on:
-  release:
-    types:
-      - published
+  push:
+    tags:
+      - "*"
 
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -39,7 +39,7 @@ jobs:
         run: dotnet restore
 
       - name: Build
-        run: dotnet publish --no-restore --runtime ${{ matrix.platform.arch }} -c Release -o out/ -p:VersionPrefix=${{ github.ref_name }}
+        run: dotnet publish --no-restore --runtime ${{ matrix.platform.arch }} -c Release -o out/ -p:VersionPrefix=${{ github.ref }}
       
       - name: Rename Artifact (Linux / macOS )
         run: "[ -f out/Speeder ] && mv out/Speeder out/speeder-${{ matrix.platform.arch }}"
@@ -56,3 +56,68 @@ jobs:
           path: |
             out/Speeder-${{ matrix.platform.arch }}
             out/Speeder-${{ matrix.platform.arch }}.exe
+  release:
+    name: "Create Release"
+    runs-on: ubuntu-22.04
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v4
+        with:
+          draft: false
+          prerelease: false
+          release_name: "v${{ github.ref }}"
+          tag_name: ${{ github.ref }}
+      
+      - name: Get All Artifacts
+        uses: actions/download-artifact@v4
+      
+      - name: Attach Linux x64 Artifact
+        uses: actions/upload-release-asset@v4
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./speeder-linux-x64
+          asset_name: speeder-linux-x64
+          asset_content_type: application/octet-stream
+      
+      - name: Attach Linux amd64 Artifact
+        uses: actions/upload-release-asset@v4
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./speeder-linux-amd64
+          asset_name: speeder-linux-amd64
+          asset_content_type: application/octet-stream
+      
+      - name: Attach Windows x64 Artifact
+        uses: actions/upload-release-asset@v4
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./speeder-windows-x64.exe
+          asset_name: speeder-windows-x64.exe
+          asset_content_type: application/octet-stream
+      
+      - name: Attach Windows arm64 Artifact
+        uses: actions/upload-release-asset@v4
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./speeder-windows-amd64.exe
+          asset_name: speeder-windows-amd64.exe
+          asset_content_type: application/octet-stream
+      
+      - name: Attach macOS x64 Artifact
+        uses: actions/upload-release-asset@v4
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./speeder-osx-x64.exe
+          asset_name: speeder-osx-x64.exe
+          asset_content_type: application/octet-stream
+      
+      - name: Attach macOS arm64 Artifact
+        uses: actions/upload-release-asset@v4
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./speeder-osx-arm64.exe
+          asset_name: speeder-osx-arm64.exe
+          asset_content_type: application/octet-stream
