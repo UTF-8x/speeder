@@ -24,7 +24,7 @@ public class SpeedTestService(
     private readonly Counter _runCounter = Metrics.CreateCounter("speeder_runs_counter", "total run count", ["source_name"]);
     private readonly Counter _failCounter = Metrics.CreateCounter("speeder_fails_counter", "total failed run count", ["source_name"]);
 
-    private readonly Gauge _intervalMinutes = Metrics.CreateGauge("speeder_interval_minutes", "measurement interval in minutes", ["source_name"]);
+    private readonly Gauge _intervalMinutes = Metrics.CreateGauge("speeder_interval_seconds", "measurement interval in seconds", ["source_name"]);
 
     private readonly int DelaySeconds = config.GetRequiredSection("Speeder").GetValue<int>("MeasurementIntervalSeconds");
 

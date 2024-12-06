@@ -1,64 +1,45 @@
-This is a very quick and dirty Iperf3 to Prometheus exporter.
+Speeder is a prometheus exporter for internet speed measurement. Using iPerf3
+and/or Ookla Speedtest CLI, Speeder regularly measures your internet (or LAN*)
+speed and exports it as prometheus metrics.
 
-More feature maybe coming at some point, idk...
+\* When runnig in iPerf3 mode, you can either measure against public internet
+servers to get your WAN speed or against a local server to measure your LAN
+speed.
 
-## How to Run
+## Quick Start
 
-You can run it locally...
-
-```shell
-dotnet run
-```
-
-Or even better, [run it in Docker](https://github.com/users/UTF-8x/packages/container/package/iperf3-exporter)
+To quickly try Speeder, run these commands. (Docker required)
 
 ```shell
-docker run -p 8080:8080 ghcr.io/utf-8x/iperf3-exporter:latest
+git clone git@github.com:UTF-8x/speeder.git
+cd speeder/Examples
+docker compose up -d
 ```
 
-Then configure your Prometheus to scrape `http://container-ip:8080/metrics`.
-By default the test runs once a minute so set your scrape interval to a minute...
+You can now access Grafana at [http://localhost:3001](http://localhost:3001).
+
+## Deploying Speeder
+
+ - [With Docker](https://github.com/UTF-8x/speeder/wiki/Running-Speeder-in-Docker)
+ - [Locally](https://github.com/UTF-8x/speeder/wiki/Installing-Speeder)
+
+## Working on Speeder
+
+1. Clone the repo
+1. Run a development server with `dotnet watch` or `dotnet run`
+1. Build for prod with `dotnet publish -c Release`
 
 ## Configuration
 
-When running locally, edit `appsettings.json`, it's pretty self-explanatory...
-
-In docker, configure with ENVs like so:
-
-```shell
-# Set the path to your iperf3 executable
-Iperf__ExePath="path_to_iperf_exe"
-
-# Set your target servers. It's an array.
-# The number at the end is the index.
-# The port can either be a single number (1234) or a range (1234-4567)
-# The hostname and port are separated with a # (because I said so)
-Iperf__Servers__0="hostname_1#port"
-Iperf__Servers__1="hostname_2#port"
-
-# etc... you get the idea...
-```
-
-## Prometheus Config
-
-This is very basic... Use it as an inspiration I guess...
-
-```yaml
-global:
-	scrape_interval: 1m
-
-scrape_configs:
-	- job_name: "iperf3"
-	  scrape_interval: 1m
-	  metrics_path: /metrics
-	  static_configs:
-		- targets: [ 'container-ip:8080' ]
-```
+See [The Wiki](https://github.com/UTF-8x/speeder/wiki/Configuration)
 
 ## Docker Compose
 
 There's a `compose.yaml` in the `Examples` dir... You can run it
-with `docker compose up -d` to get an instance of this exporter,
-prometheus configured to scrape it and grafana.
+with `docker compose up -d` to get an instance of speeder,
+prometheus configured to scrape it and grafana with a premade dashboard.
+
+Due to licensing difficulties with the Speedtest CLI, you will need to first
+edit the `compose.yaml` file to accept the Speedtest EULA.
 
 The grafana dashboard will be available on `0.0.0.0:3001`
