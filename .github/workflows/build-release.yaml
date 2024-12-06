@@ -19,7 +19,7 @@ jobs:
         platform:
           - { name: Linux x64, os: ubuntu-22.04, arch: linux-x64 }
           - { name: Linux arm64, os: ubuntu-22.04, arch: linux-arm64 }
-          - { name: Windows x86, os: windows-2022, arch: windows-x64 }
+          - { name: Windows x86, os: windows-2022, arch: win-x64 }
           - { name: macOS, os: macos-15, arch: osx-x64 }
           - { name: macOS ARM, os: macos-15, arch: osx-arm64 }
 
@@ -100,26 +100,18 @@ jobs:
           asset_name: speeder-windows-x64.exe
           asset_content_type: application/octet-stream
       
-      - name: Attach Windows arm64 Artifact
-        uses: actions/upload-release-asset@v4
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./speeder-windows-amd64.exe
-          asset_name: speeder-windows-amd64.exe
-          asset_content_type: application/octet-stream
-      
       - name: Attach macOS x64 Artifact
         uses: actions/upload-release-asset@v4
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./speeder-osx-x64.exe
-          asset_name: speeder-osx-x64.exe
+          asset_path: ./speeder-osx-x64
+          asset_name: speeder-osx-x64
           asset_content_type: application/octet-stream
       
       - name: Attach macOS arm64 Artifact
         uses: actions/upload-release-asset@v4
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./speeder-osx-arm64.exe
-          asset_name: speeder-osx-arm64.exe
+          asset_path: ./speeder-osx-arm64
+          asset_name: speeder-osx-arm64
           asset_content_type: application/octet-stream
