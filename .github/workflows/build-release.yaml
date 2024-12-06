@@ -71,7 +71,7 @@ jobs:
         uses: actions/download-artifact@v4
       
       - name: Attach Linux x64 Artifact
-        uses: actions/upload-release-asset@v4
+        uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./speeder-linux-x64
@@ -79,7 +79,7 @@ jobs:
           asset_content_type: application/octet-stream
       
       - name: Attach Linux amd64 Artifact
-        uses: actions/upload-release-asset@v4
+        uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./speeder-linux-amd64
@@ -87,7 +87,7 @@ jobs:
           asset_content_type: application/octet-stream
       
       - name: Attach Windows x64 Artifact
-        uses: actions/upload-release-asset@v4
+        uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./speeder-windows-x64.exe
@@ -95,7 +95,7 @@ jobs:
           asset_content_type: application/octet-stream
       
       - name: Attach macOS x64 Artifact
-        uses: actions/upload-release-asset@v4
+        uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./speeder-osx-x64
@@ -103,7 +103,7 @@ jobs:
           asset_content_type: application/octet-stream
       
       - name: Attach macOS arm64 Artifact
-        uses: actions/upload-release-asset@v4
+        uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./speeder-osx-arm64
