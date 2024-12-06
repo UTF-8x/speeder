@@ -20,7 +20,6 @@ jobs:
           - { name: Linux x64, os: ubuntu-22.04, arch: linux-x64 }
           - { name: Linux arm64, os: ubuntu-22.04, arch: linux-arm64 }
           - { name: Windows x86, os: windows-2022, arch: windows-x64 }
-          - { name: Windows arm64, os: windows-2022, arch: windows-arm64 }
           - { name: macOS, os: macos-15, arch: osx-x64 }
           - { name: macOS ARM, os: macos-15, arch: osx-arm64 }
 
