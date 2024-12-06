@@ -41,6 +41,12 @@ jobs:
       - name: Build
         run: dotnet publish --no-restore --runtime ${{ matrix.platform.arch }} -c Release -o out/ -p:VersionPrefix=${{ github.ref_name }}
       
+      - name: Rename Artifact (Linux / macOS )
+        run: "[ -f out/Speeder ] && mv out/Speeder out/speeder-${{ matrix.platform.arch }}"
+
+      - name: Rename Artifact (Windows)
+        run: "Move-Item out/Speeder.exe out/Speeder-${{ matrix.platform.arch }}.exe -Force -ErrorAction SilentlyContinue"
+
       - name: Publish
         uses: actions/upload-artifact@v4
         with:
@@ -48,5 +54,5 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
           path: |
-            out/Speeder
-            out/Speeder.exe
+            out/Speeder-${{ matrix.platform.arch }}
+            out/Speeder-${{ matrix.platform.arch }}.exe
