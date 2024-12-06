@@ -18,9 +18,8 @@ jobs:
       matrix:
         platform:
           - { name: Linux x64, os: ubuntu-22.04, arch: linux-x64 }
-          - { name: Linux arm64, os: ubuntu-22.04, arch: linux-arm64 }
-          - { name: Windows x86, os: windows-2022, arch: win-x64 }
-          - { name: macOS, os: macos-15, arch: osx-x64 }
+          - { name: Linux arm64, os: ubuntu-22.04, arch: linux-arm64 }          
+          #- { name: macOS, os: macos-15, arch: osx-x64 }
           - { name: macOS ARM, os: macos-15, arch: osx-arm64 }
 
     steps:
@@ -40,13 +39,8 @@ jobs:
       - name: Build
         run: dotnet publish --no-restore --runtime ${{ matrix.platform.arch }} -c Release -o out/ -p:VersionPrefix=${{ github.ref_name }}
       
-      - name: Rename Artifact (Linux / macOS )
-        if: ${{ matrix.os != 'windows-2022' }}
+      - name: Rename Artifact
         run: "[ -f out/Speeder ] && mv out/Speeder out/speeder-${{ matrix.platform.arch }}"
-
-      - name: Rename Artifact (Windows)
-        if: ${{ matrix.os == 'windows-2022' }}
-        run: "Move-Item out/Speeder.exe out/Speeder-${{ matrix.platform.arch }}.exe -Force -ErrorAction SilentlyContinue"
 
       - name: Publish
         uses: actions/upload-artifact@v4
