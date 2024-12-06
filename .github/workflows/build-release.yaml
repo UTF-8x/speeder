@@ -2,9 +2,9 @@ name: Build Release
 
 on:
   workflow_dispatch:
-    release:
-      types:
-        - published
+  release:
+    types:
+      - published
 
 env:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
