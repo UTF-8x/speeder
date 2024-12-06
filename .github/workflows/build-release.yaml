@@ -39,7 +39,7 @@ jobs:
         run: dotnet restore
 
       - name: Build
-        run: dotnet publish --no-restore --runtime ${{ matrix.platform.arch }} -c Release -o out/ -p:VersionPrefix=${{ github.ref }}
+        run: dotnet publish --no-restore --runtime ${{ matrix.platform.arch }} -c Release -o out/ -p:VersionPrefix=${{ github.ref_name }}
       
       - name: Rename Artifact (Linux / macOS )
         run: "[ -f out/Speeder ] && mv out/Speeder out/speeder-${{ matrix.platform.arch }}"
@@ -69,7 +69,7 @@ jobs:
         with:
           draft: false
           prerelease: false
-          release_name: "v${{ github.ref }}"
+          release_name: "v${{ github.ref_name }}"
           tag_name: ${{ github.ref }}
       
       - name: Get All Artifacts
