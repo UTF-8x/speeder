@@ -1,0 +1,53 @@
+name: Build Release
+
+on:
+  workflow_dispatch:
+    release:
+      types:
+        - published
+
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+jobs:
+  build:
+    name: ${{ matrix.platform.name }}
+    runs-on: ${{ matrix.platform.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - { name: Linux x64, os: ubuntu-22.04, arch: linux-x64 }
+          - { name: Linux arm64, os: ubuntu-22.04, arch: linux-arm64 }
+          - { name: Windows x86, os: windows-2022, arch: windows-x64 }
+          - { name: Windows arm64, os: windows-2022, arch: windows-arm64 }
+          - { name: macOS, os: macos-15, arch: osx-x64 }
+          - { name: macOS ARM, os: macos-15, arch: osx-arm64 }
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8
+      
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet publish --no-restore --platform ${{ matrix.platform.arch }} -c Release -o /out -p:VersionPrefix=${{ github.ref_name }}
+      
+      - name: Publish
+        uses: actions/upload-artifact@v4
+        with:
+          name: exe
+          if-no-files-found: ignore
+          retention-days: 7
+          path: |
+            out/Speeder
+            out/Speeder.exe
