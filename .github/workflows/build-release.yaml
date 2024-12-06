@@ -58,6 +58,7 @@ jobs:
             out/Speeder-${{ matrix.platform.arch }}.exe
   release:
     name: "Create Release"
+    needs: [ build ]
     runs-on: ubuntu-22.04
     env:
       GITHUB_TOKEN: ${{ github.token }}
